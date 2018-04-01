@@ -1,0 +1,2 @@
+python emscraper.py
+pause
