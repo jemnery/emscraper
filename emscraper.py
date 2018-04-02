@@ -21,7 +21,14 @@ def is_in_stock(tree):
 def get_product_urls():
     product_list = []
     
+    # generally im stock:
     #product_list.append("uss-thunderchild-ncc-63549-model")
+    #product_list.append("klingon-bird-of-prey-model")
+    #product_list.append("klingon-ktinga-class-battlecruiser-model")
+
+    # 404 test:
+    # product_list.append("uss-enterprise-ncc-1701-starship-invalid")
+
     product_list.append("uss-enterprise-ncc--1701-2271-model")
     product_list.append("uss-enterprise-ncc-1701-e-starship-model")
     product_list.append("uss-enterprise-ncc-1701-d-model")
@@ -34,6 +41,10 @@ def get_product_urls():
         url_dict[product] = root_url + product
     return url_dict
     
+def get_anchor_html(name, url, status):
+    a = '<a href="' + url + '">' + name + ' -' + status + '</a>'
+    return a
+
 def scan_local_files():
     with os.scandir("./html") as filesInDir:  
             for entry in filesInDir:
@@ -51,23 +62,30 @@ def main():
     anchors = []
     in_stock_count = 0
     not_in_stock_count = 0
+    not_found_count = 0
 
     for k, v, in url_list.items():
         print("Processing product page: " + k)
+        a = ""
         page = requests.get(v)
-        tree = html.fromstring(page.content)
 
-        if tree is not None:
-            in_stock = is_in_stock(tree)
-            a = '<a href="' + v + '">' + k
-            if in_stock:
-                in_stock_count += 1
-                a += ' - <strong>IN STOCK!</strong>'
-            else:
-                not_in_stock_count += 1
-                a += ' - not in stock'
-            a += '</a>'
-            anchors.append(a)
+        if (page.status_code == 200):  # OK
+            tree = html.fromstring(page.content)
+
+            if tree is not None:
+                in_stock = is_in_stock(tree)
+                if in_stock:
+                    in_stock_count += 1
+                    status = '<strong>IN STOCK!</strong>'
+                else:
+                    not_in_stock_count += 1
+                    status = 'not in stock'
+        else:
+            not_found_count += 1
+            status = str(page.status_code) + " " + page.reason
+                
+        a = get_anchor_html(k, v, status)
+        anchors.append(a)
 
     email_body = '<h3>Summary</h3><p>In stock: ' + str(in_stock_count) + '; not in stock: ' + str(not_in_stock_count) + '</p>'
     email_body += '<h3>Products</h3><p>'
