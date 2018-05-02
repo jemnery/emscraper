@@ -1,4 +1,6 @@
 import os
+import time
+import random
 from lxml import html
 import requests
 from self_email import send_self_email
@@ -22,17 +24,17 @@ def get_product_urls():
     product_list = []
     
     # generally im stock:
-    #product_list.append("uss-thunderchild-ncc-63549-model")
-    #product_list.append("klingon-bird-of-prey-model")
-    #product_list.append("klingon-ktinga-class-battlecruiser-model")
+    # product_list.append("uss-thunderchild-ncc-63549-model")
+    # product_list.append("klingon-bird-of-prey-model")
+    # product_list.append("klingon-ktinga-class-battlecruiser-model")
 
     # 404 test:
     # product_list.append("uss-enterprise-ncc-1701-starship-invalid")
 
     product_list.append("uss-enterprise-ncc--1701-2271-model")
     product_list.append("uss-enterprise-ncc-1701-e-starship-model")
-    product_list.append("uss-enterprise-ncc-1701-d-model")
-    product_list.append("enterprise-nx-01-model-ship")
+    # product_list.append("uss-enterprise-ncc-1701-d-model")
+    # product_list.append("enterprise-nx-01-model-ship")
     product_list.append("uss-enterprise-ncc-1701-starship")
 
     root_url = "https://shop.eaglemoss.com/star-trek-official-starship-collection/"
@@ -42,7 +44,7 @@ def get_product_urls():
     return url_dict
     
 def get_anchor_html(name, url, status):
-    a = '<a href="' + url + '">' + name + ' -' + status + '</a>'
+    a = '<a href="' + url + '">' + name + ' - ' + status + '</a>'
     return a
 
 def scan_local_files():
@@ -64,10 +66,14 @@ def main():
     not_in_stock_count = 0
     not_found_count = 0
 
+    headers = {
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0'
+    }
+
     for k, v, in url_list.items():
         print("Processing product page: " + k)
         a = ""
-        page = requests.get(v)
+        page = requests.get(v, headers=headers)
 
         if (page.status_code == 200):  # OK
             tree = html.fromstring(page.content)
@@ -87,11 +93,13 @@ def main():
         a = get_anchor_html(k, v, status)
         anchors.append(a)
 
+        time.sleep(20)
+
     email_body = '<h3>Summary</h3><p>In stock: ' + str(in_stock_count) + '; not in stock: ' + str(not_in_stock_count) + '</p>'
     email_body += '<h3>Products</h3><p>'
     for anchor in anchors:
         email_body += anchor + '<br /><br />'
-    email_body += '</p>'
+    email_body += '</p>\r\n\r\n'
 
     email_subject = 'Eaglemoss auto stock check (' + str(in_stock_count) + ' in stock)'
     send_self_email(email_subject, email_body)
