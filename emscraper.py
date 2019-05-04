@@ -27,7 +27,7 @@ def is_in_stock(tree):
 def get_product_urls():
     product_list = []
     
-    # generally im stock:
+    # generally in stock:
     # product_list.append("uss-thunderchild-ncc-63549-model")
     # product_list.append("klingon-bird-of-prey-model")
     # product_list.append("klingon-ktinga-class-battlecruiser-model")
@@ -36,7 +36,6 @@ def get_product_urls():
     # product_list.append("uss-enterprise-ncc-1701-starship-invalid")
 
     # product_list.append("uss-enterprise-ncc--1701-2271-model")
-    product_list.append("iss-enterprise-d-starship-mirror-universe")
     product_list.append("uss-enterprise-ncc-1701-e-starship-model")
     # product_list.append("uss-enterprise-ncc-1701-d-model")
     # product_list.append("enterprise-nx-01-model-ship")
@@ -111,5 +110,5 @@ def main():
     send_self_email(email_subject, email_body)
 
 if __name__ == "__main__":
-    # main()
-    scan_local_files()
+    main()
+    #scan_local_files()
