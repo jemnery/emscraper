@@ -7,16 +7,20 @@ from self_email import send_self_email
 
 def is_in_stock(tree):
     in_stock = False
+
+    # <span> element contains out of stock button. 
+    out_of_stock_ctr_id = "ctl00_FeaturedContent_thestock" 
+    out_of_stock_ctr = tree.xpath("//span[@id = '%s']" % out_of_stock_ctr_id)
+    out_of_stock_ctr_style = out_of_stock_ctr[0].attrib.get("style")
+
+    #out_of_stock_btn_id = "ctl00_FeaturedContent_LinkButton11" # <a> element
+    #out_of_stock_btn = tree.xpath("//a[@id = '%s']" % out_of_stock_btn_id)
+
     buy_btn_id = "ctl00_FeaturedContent_LinkButton1" # <a> element    
     buy_btn = tree.xpath("//a[@id = '%s']" % buy_btn_id)    
+    buy_btn_style = buy_btn[0].attrib.get("style")
 
-    if not buy_btn:
-        out_of_stock_btn_id = "ctl00_FeaturedContent_LinkButton11" # <a> element
-        out_of_stock_btn = tree.xpath("//a[@id = '%s']" % out_of_stock_btn_id)
-        if not out_of_stock_btn:
-            raise Exception("Neither button found")            
-    else:
-        in_stock = True 
+    in_stock = (out_of_stock_ctr_style == "display:none;") and (buy_btn_style != "display:none;")
 
     return in_stock
 
@@ -31,7 +35,8 @@ def get_product_urls():
     # 404 test:
     # product_list.append("uss-enterprise-ncc-1701-starship-invalid")
 
-    product_list.append("uss-enterprise-ncc--1701-2271-model")
+    # product_list.append("uss-enterprise-ncc--1701-2271-model")
+    product_list.append("iss-enterprise-d-starship-mirror-universe")
     product_list.append("uss-enterprise-ncc-1701-e-starship-model")
     # product_list.append("uss-enterprise-ncc-1701-d-model")
     # product_list.append("enterprise-nx-01-model-ship")
@@ -58,6 +63,7 @@ def scan_local_files():
                         with open(entry.path, "r") as f:
                             page = f.read()
                             tree = html.fromstring(page)
+                            in_stock = is_in_stock(tree)
 
 def main():
     url_list = get_product_urls()
@@ -105,4 +111,5 @@ def main():
     send_self_email(email_subject, email_body)
 
 if __name__ == "__main__":
-    main()
+    # main()
+    scan_local_files()
